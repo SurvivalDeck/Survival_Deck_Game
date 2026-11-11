@@ -559,7 +559,12 @@ async function declineTerms(){
 }
 async function enterGame(){document.body.classList.toggle("host-view",isHost());document.body.classList.toggle("player-view",!isHost());$("loginView").classList.add("hidden");$("gameView").classList.remove("hidden");$("welcome").textContent="Welcome, "+profile.display_name;$ ("roleLine").textContent=isHost()?"Host + Player · Your own cards are private too.":"Player · Your cards and actions are private.";$ ("hostPanel").classList.toggle("hidden",!isHost());await syncServerClock();await refreshAll();subscribe();if(clockSyncId)clearInterval(clockSyncId);clockSyncId=setInterval(syncServerClock,60000);playSound("lobby")} 
 async function refreshAll(){if(!profile||refreshing)return;refreshing=true;try{
- const {data:g,error:ge}=await db.from("game_state").select("*").eq("id",1).single();if(ge)throw ge;game=g;
+ const {data:g,error:ge}=await db.from("game_state").select("*").eq("id",1).single();if(ge)throw ge;
+ // Fallback round detection: Realtime notifications can occasionally be missed.
+ const previouslyObservedRound=lastObservedRound;
+ if(previouslyObservedRound!==null && Number(g.round_number||0)>previouslyObservedRound && g.status==="selecting")showRoundIntro(g.round_number);
+ lastObservedRound=Number(g.round_number||0);
+ game=g;
  const [s,p,h,a,r]=await Promise.all([
   db.from("player_stats").select("user_id,lives,eliminated,locked_round"),
   db.from("profiles").select("user_id,display_name,is_host"),
@@ -631,7 +636,7 @@ function render(){
  const alive=stats.filter(s=>!s.eliminated&&s.lives>0),aliveMe=!!ownStats()&&!ownStats().eliminated;
  $("aliveStat").textContent=alive.length;$("roundStat").textContent=game.round_number||0;$("lifeStat").textContent=(ownStats()?.lives??3)+" ♥";$("submittedStat").textContent=myAction()?"LOCKED":"READY";
  $("lobbyNotice").classList.toggle("hidden",game.status!=="lobby");$("lobbyNotice").textContent=game.status==="lobby"?"Waiting for the host to start the game. All nine players must accept the terms first.":"The game is in progress.";
- const selecting=game.status==="selecting",mine=myAction(),locked=ownStats()?.locked_round===game.round_number;$("nextRoundNotice").classList.toggle("hidden",game.status!=="revealed"||isHost());$("handSection").classList.toggle("hidden",!selecting||!aliveMe||locked);const cardPickFocus=selecting&&aliveMe&&!locked&&!mine;document.body.classList.toggle("phase-card-pick",cardPickFocus);syncPickAmbience(cardPickFocus);$("waitingSection").classList.toggle("hidden",!(selecting&&((mine&&aliveMe)||locked)));$("waitingSection").textContent=locked?"CARD LOCKED! You cannot use a card this round. You will return next round.":game.status==="defending"?"The action phase is closed. The round is being resolved.":"Your selected card action is locked. Wait for your round notification.";$("eliminatedNotice").classList.toggle("hidden",aliveMe);
+ const selecting=game.status==="selecting",mine=myAction(),locked=ownStats()?.locked_round===game.round_number;$("nextRoundNotice").classList.toggle("hidden",game.status!=="revealed"||isHost());$("handSection").classList.toggle("hidden",!selecting||!aliveMe||locked||roundIntroUntilMs>Date.now());const cardPickFocus=selecting&&aliveMe&&!locked&&!mine;document.body.classList.toggle("phase-card-pick",cardPickFocus);syncPickAmbience(cardPickFocus);$("waitingSection").classList.toggle("hidden",!(selecting&&((mine&&aliveMe)||locked)));$("waitingSection").textContent=locked?"CARD LOCKED! You cannot use a card this round. You will return next round.":game.status==="defending"?"The action phase is closed. The round is being resolved.":"Your selected card action is locked. Wait for your round notification.";$("eliminatedNotice").classList.toggle("hidden",aliveMe);
  if(selecting&&aliveMe)renderHand();
  const incoming=actions.filter(a=>a.target_id===profile.user_id);
  const submitted="Choose one of your three hidden cards. ATTACK and BLANK are more common; the other two are discarded.";
@@ -640,7 +645,7 @@ function render(){
  renderOnlineStatus();
  $("leaderboard").innerHTML=[...stats].sort((a,b)=>Number(a.eliminated)-Number(b.eliminated)||b.lives-a.lives).map((s,i)=>`<div class="player-row"><div><strong>${i+1}. ${escapeHtml(playerName(s.user_id))}</strong><div class="subline">${s.eliminated?"ELIMINATED":"SURVIVING"}</div></div><span class="lives">${s.lives} ♥</span></div>`).join("");
  $("winnerPanel").classList.toggle("hidden",game.status!=="finished"||!!game.ended_by_host);$("gameEndedPanel").classList.toggle("hidden",!game.ended_by_host);if(game.status==="finished"&&!game.ended_by_host){const w=stats.find(s=>!s.eliminated&&s.lives>0);const winnerName=w?playerName(w.user_id):"No winner";$("winnerName").textContent=winnerName;if(w)showWinnerCelebration(winnerName)}else if(game.status==="lobby"){winnerCelebrated=false;$("winnerCelebration").classList.add("hidden");publicEventQueue=[];publicEventShowing=false;}
- if(game.status==="revealed"){showPersonalRoundEvents()}else{lastPopupRound=null;}renderRoundChat();updateTimer();
+ if(game.status==="revealed"){showPersonalRoundEvents()}renderRoundChat();updateTimer();
 }
 function cardNeedsTarget(card){return card.card_type==="ATTACK"||(card.card_type==="JOKER"&&(["CARD_LOCK","DOUBLE_ATTACK","LIFE_DRAIN"].includes(card.joker_effect)))}
 function renderHand(){
@@ -801,6 +806,10 @@ async function sendRoundChat(){
  finally{btn.disabled=false;input.focus();}
 }
 let lastPopupRound=null;
+let recapLoadingRound=null;
+const recapShownRounds=new Set();
+let recapRetryTimer=null;
+let lastObservedRound=null;
 let popupTimer=null;
 let eliminationTimer=null;
 let publicEventQueue=[];
@@ -827,7 +836,7 @@ function showRoundIntro(round){
  roundIntroTimer=setInterval(()=>{
   remaining=Math.max(0,Math.ceil((roundIntroUntilMs-Date.now())/1000));
   if(countdown)countdown.textContent=remaining>0?("CARDS OPEN IN "+remaining):"LET'S GO!";
-  if(remaining<=0){clearInterval(roundIntroTimer);roundIntroTimer=null;overlay.classList.add("hidden");roundIntroUntilMs=0;refreshAll();updateTimer();playSound("deal");}
+  if(remaining<=0){clearInterval(roundIntroTimer);roundIntroTimer=null;overlay.classList.add("hidden");roundIntroUntilMs=0;refreshAll();render();updateTimer();playSound("deal");}
  },200);
 }
 function showHostStatus(kind){
@@ -917,32 +926,49 @@ function showWinnerCelebration(name){
  overlay.classList.remove("hidden");playSound("reveal");
 }
 function showPersonalRoundEvents(){
- const thisRound=game?.round_number;
- if(!thisRound||lastPopupRound===thisRound)return;
- lastPopupRound=thisRound;
- // Give the round-resolution transaction a moment to finish writing its log rows.
+ const thisRound=Number(game?.round_number||0);
+ if(!thisRound||game?.status!=="revealed"||recapShownRounds.has(thisRound)||recapLoadingRound===thisRound)return;
+ recapLoadingRound=thisRound;
+ // Wait briefly for the resolve transaction and its round_log inserts to settle.
  setTimeout(async()=>{
-  if(!profile||!game||game.round_number!==thisRound||game.status!=="revealed")return;
-  const {data,error}=await db.from("round_log").select("id,message,created_at").eq("round_number",thisRound).order("created_at",{ascending:true});
-  if(error){lastPopupRound=null;toast("Round recap could not load. Please refresh.");return;}
-  if(!profile||!game||game.round_number!==thisRound||game.status!=="revealed")return;
-  const rows=(data||[]).filter(row=>{
-   const message=String(row.message||"");
-   const lower=message.toLocaleLowerCase();
-   return !!classifyRoundEvent(message)&&!lower.startsWith("round resolved")&&!lower.startsWith("the game is finished");
-  });
-  const popup=$("eventPopup");
-  const entries=rows.slice(0,18).map(row=>{
-   const message=String(row.message||"");
-   const effect=classifyRoundEvent(message);
-   return `<div class="event-recap-row" style="--event-accent:${effect.accent}"><div class="event-recap-icon">${effect.icon}</div><div class="event-recap-copy"><div class="event-recap-title">${escapeHtml(effect.title)}</div><div class="event-recap-message">${escapeHtml(message)}</div></div></div>`;
-  }).join("");
-  const extra=rows.length>18?`<div class="event-hint">AND ${rows.length-18} MORE IMPORTANT EVENTS</div>`:"";
-  popup.innerHTML=`<div class="event-inner" style="--event-accent:#d5ad62"><div class="event-icon">🏟️</div><div class="event-kicker">SURVIVAL DECK · ROUND ${thisRound}</div><div class="event-title">ROUND RECAP</div><div class="event-recap-list">${entries||'<div class="event-message">No major events this round.</div>'}</div>${extra}<div class="event-hint">IMPORTANT EVENTS ONLY</div><button class="event-confirm" id="roundHighlightsOkay" type="button">OKAY</button></div>`;
-  popup.classList.remove("hidden");
-  clearTimeout(popupTimer);
-  const firstEffect=rows.length?classifyRoundEvent(rows[0].message):null;
-  playSound(firstEffect?.sound||"reveal");
+  if(!profile||!game||Number(game.round_number)!==thisRound||game.status!=="revealed"){
+   if(recapLoadingRound===thisRound)recapLoadingRound=null;
+   return;
+  }
+  try{
+   const {data,error}=await db.from("round_log").select("id,message,created_at").eq("round_number",thisRound).order("created_at",{ascending:true});
+   if(error)throw error;
+   if(!profile||!game||Number(game.round_number)!==thisRound||game.status!=="revealed"){
+    if(recapLoadingRound===thisRound)recapLoadingRound=null;
+    return;
+   }
+   const rows=(data||[]).filter(row=>{
+    const message=String(row.message||"");
+    const lower=message.toLocaleLowerCase();
+    return !!classifyRoundEvent(message)&&!lower.startsWith("round resolved")&&!lower.startsWith("the game is finished");
+   });
+   const popup=$("eventPopup");
+   const entries=rows.slice(0,18).map(row=>{
+    const message=String(row.message||"");
+    const effect=classifyRoundEvent(message);
+    return `<div class="event-recap-row" style="--event-accent:${effect.accent}"><div class="event-recap-icon">${effect.icon}</div><div class="event-recap-copy"><div class="event-recap-title">${escapeHtml(effect.title)}</div><div class="event-recap-message">${escapeHtml(message)}</div></div></div>`;
+   }).join("");
+   const extra=rows.length>18?`<div class="event-hint">AND ${rows.length-18} MORE IMPORTANT EVENTS</div>`:"";
+   popup.innerHTML=`<div class="event-inner" style="--event-accent:#d5ad62"><div class="event-icon">🏟️</div><div class="event-kicker">SURVIVAL DECK · ROUND ${thisRound}</div><div class="event-title">ROUND RECAP</div><div class="event-recap-list">${entries||'<div class="event-message">No major events this round.</div>'}</div>${extra}<div class="event-hint">IMPORTANT EVENTS ONLY</div><button class="event-confirm" id="roundHighlightsOkay" type="button">OKAY</button></div>`;
+   popup.classList.remove("hidden");
+   recapShownRounds.add(thisRound);
+   lastPopupRound=thisRound;
+   clearTimeout(popupTimer);
+   const firstEffect=rows.length?classifyRoundEvent(rows[0].message):null;
+   playSound(firstEffect?.sound||"reveal");
+  }catch(e){
+   console.error("Round recap load failed:",e);
+   // Permit another attempt rather than permanently marking this round as shown.
+   if(recapRetryTimer)clearTimeout(recapRetryTimer);
+   recapRetryTimer=setTimeout(()=>{recapRetryTimer=null;showPersonalRoundEvents()},1200);
+  }finally{
+   if(recapLoadingRound===thisRound)recapLoadingRound=null;
+  }
  },450);
 }
 
