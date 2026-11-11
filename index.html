@@ -169,21 +169,42 @@ body.player-view.phase-revealed #gameView>.panel:first-child .stats{display:grid
  #handCards .power-card .card-front .mini{font-size:7px!important;margin-top:5px}
  .card-slot-caption{font-size:8px!important;letter-spacing:.07em!important}
 }
-.event-popup{position:fixed;z-index:9999;top:max(14px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(92vw,430px);padding:16px 18px;border:1px solid #d5ad62;border-radius:18px;background:linear-gradient(135deg,#202c40f5,#101827f7);box-shadow:0 18px 60px #0009,0 0 30px #d5ad6230;color:#f6f0e3;animation:eventDrop .42s cubic-bezier(.2,.8,.2,1) both;backdrop-filter:blur(12px)}
+/* Cinematic full-screen round event popups */
+.event-popup{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 42%,#26344deF 0%,#0a0e18f7 66%,#05070cf9 100%);backdrop-filter:blur(9px);color:#fff;text-align:center;overflow:hidden;isolation:isolate;animation:eventBackdrop .28s ease both}
 .event-popup.hidden{display:none}
-.event-popup .event-kicker{font-size:9px;font-weight:900;letter-spacing:.2em;color:#e7c27d;margin-bottom:6px}
-.event-popup .event-title{font-size:16px;font-weight:900;letter-spacing:.08em;margin-bottom:5px}
-.event-popup .event-message{font-size:13px;line-height:1.45;color:#d9e1ed;overflow-wrap:anywhere}
-.event-popup .event-progress{height:3px;background:#ffffff18;border-radius:9px;margin-top:12px;overflow:hidden}
-.event-popup .event-progress:after{content:"";display:block;height:100%;background:linear-gradient(90deg,#d5ad62,#f4dfaa);animation:eventTimer 6s linear forwards}
-@keyframes eventDrop{from{opacity:0;transform:translate(-50%,-18px) scale(.96)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.event-popup:before,.event-popup:after{content:"";position:absolute;z-index:-1;width:min(78vw,560px);aspect-ratio:1;border:1px solid #e9bd6230;border-radius:50%;animation:eventOrbit 8s linear infinite}
+.event-popup:after{width:min(96vw,700px);border-style:dashed;animation-duration:14s;animation-direction:reverse}
+.event-popup .event-inner{position:relative;width:min(92vw,560px);padding:clamp(28px,6vw,48px) 22px;border:1px solid var(--event-accent,#d5ad62);border-radius:28px;background:linear-gradient(145deg,#202c40f5,#101521fa);box-shadow:0 25px 100px #000c,0 0 65px color-mix(in srgb,var(--event-accent,#d5ad62) 25%,transparent);animation:eventCardPop .58s cubic-bezier(.16,1.2,.3,1) both}
+.event-popup .event-icon{font-size:clamp(54px,12vw,82px);line-height:1;margin-bottom:18px;filter:drop-shadow(0 0 22px color-mix(in srgb,var(--event-accent,#d5ad62) 55%,transparent));animation:eventIconPulse 1.4s ease-in-out infinite alternate}
+.event-popup .event-kicker{font-size:10px;font-weight:900;letter-spacing:.22em;color:var(--event-accent,#e7c27d);margin-bottom:12px}
+.event-popup .event-title{font-size:clamp(23px,5vw,34px);font-weight:1000;letter-spacing:.06em;margin-bottom:12px;text-shadow:0 3px 24px #0008}
+.event-popup .event-message{font-size:clamp(14px,3vw,17px);line-height:1.55;color:#e1e7f0;overflow-wrap:anywhere;max-width:460px;margin:0 auto}
+.event-popup .event-progress{height:4px;background:#ffffff18;border-radius:9px;margin:24px auto 0;max-width:300px;overflow:hidden}
+.event-popup .event-progress:after{content:"";display:block;height:100%;background:linear-gradient(90deg,var(--event-accent,#d5ad62),#fff1c7);animation:eventTimer var(--recap-duration,5.2s) linear forwards}
+.event-popup .event-hint{font-size:9px;letter-spacing:.16em;color:#8793a8;margin-top:14px}
+.event-popup .event-confirm{display:inline-flex;align-items:center;justify-content:center;min-width:150px;margin:22px auto 0;padding:13px 28px;border:1px solid #e7c27d;border-radius:12px;background:linear-gradient(135deg,#e7c27d,#b8893d);color:#17130b;font-size:13px;font-weight:1000;letter-spacing:.1em;cursor:pointer;box-shadow:0 8px 25px #0005}
+.event-popup .event-confirm:active{transform:scale(.97)}
+@keyframes eventBackdrop{from{opacity:0}to{opacity:1}}
+@keyframes eventCardPop{from{opacity:0;transform:translateY(30px) scale(.82) rotateX(12deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}
+@keyframes eventIconPulse{from{transform:scale(.94) rotate(-3deg)}to{transform:scale(1.08) rotate(3deg)}}
+@keyframes eventOrbit{to{transform:rotate(360deg) scale(1.08)}}
 @keyframes eventTimer{to{width:0}}
+/* One compact cinematic recap per completed round (instead of one popup per action). */
+.event-recap-list{display:grid;gap:8px;margin:20px auto 0;max-height:min(42vh,360px);overflow:auto;text-align:left;padding:2px 6px 2px 2px;overscroll-behavior:contain}
+.event-recap-row{display:grid;grid-template-columns:38px minmax(0,1fr);gap:10px;align-items:center;padding:10px 12px;border:1px solid #ffffff20;border-radius:13px;background:#ffffff0b}
+.event-recap-icon{font-size:25px;text-align:center;filter:drop-shadow(0 0 8px var(--event-accent,#d5ad62))}
+.event-recap-copy{min-width:0}.event-recap-title{font-size:10px;font-weight:900;letter-spacing:.1em;color:var(--event-accent,#e7c27d);margin-bottom:3px}.event-recap-message{font-size:12px;line-height:1.4;color:#e1e7f0;overflow-wrap:anywhere}
+@media(max-width:520px){.event-popup{padding:12px}.event-popup .event-inner{padding:24px 14px}.event-recap-list{max-height:45vh}.event-recap-row{padding:9px}}
 
 
 #eliminationCelebration{position:fixed;inset:0;z-index:10010;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 50% 35%,#542b38f5,#090b13 74%);overflow:hidden;isolation:isolate;text-align:center;color:#fff1f2}
 #eliminationCelebration.hidden{display:none}
 .elimination-card{position:relative;z-index:2;width:min(92vw,620px);padding:clamp(28px,6vw,52px) 24px;border:1px solid #ff8c9c;border-radius:28px;background:linear-gradient(145deg,#321b2bf5,#111725f7);box-shadow:0 25px 100px #000c,0 0 70px #ff526533;animation:eliminationPop .65s cubic-bezier(.16,1.25,.35,1) both}
-.elimination-symbol{font-size:clamp(58px,12vw,92px);filter:drop-shadow(0 0 18px #ff8290);animation:eliminationPulse 1.4s ease-in-out infinite}
+.elimination-symbol{font-size:clamp(68px,14vw,108px);filter:drop-shadow(0 0 22px #ff5265);transform-origin:center;animation:heartBreakImpact .9s cubic-bezier(.2,.85,.25,1) both,eliminationPulse 1.5s 1s ease-in-out infinite}
+.elimination-card:before,.elimination-card:after{content:"✦";position:absolute;top:18%;font-size:clamp(20px,5vw,34px);color:#ff9eaa;opacity:0;animation:heartSpark .9s .25s ease-out both}
+.elimination-card:before{left:13%}.elimination-card:after{right:13%;animation-delay:.38s}
+@keyframes heartBreakImpact{0%{transform:scale(.25) rotate(-25deg);opacity:0;filter:blur(5px)}35%{transform:scale(1.35) rotate(12deg);opacity:1;filter:drop-shadow(0 0 30px #ff5265)}55%{transform:scale(.88) rotate(-9deg)}75%{transform:scale(1.08) rotate(5deg)}100%{transform:scale(1) rotate(0);opacity:1}}
+@keyframes heartSpark{0%{opacity:0;transform:scale(.2) rotate(0)}35%{opacity:1;transform:scale(1.5) rotate(70deg)}100%{opacity:0;transform:scale(.3) rotate(150deg) translateY(-24px)}}
 .elimination-kicker{margin-top:12px;color:#ff9eaa;font-size:11px;font-weight:900;letter-spacing:.28em}
 .elimination-card h2{margin:14px 0 10px;font-size:clamp(32px,8vw,60px);line-height:1.05;overflow-wrap:anywhere;color:#fff}
 .elimination-card p{color:#f2cbd1;font-size:clamp(14px,3vw,18px);line-height:1.5}
@@ -199,6 +220,14 @@ body.player-view.phase-revealed #gameView>.panel:first-child .stats{display:grid
 .game-start-card p{color:#d8e4f7;font-size:clamp(14px,3vw,18px);line-height:1.5}
 .game-start-close{margin-top:18px;border:1px solid #f1d48b;border-radius:999px;padding:11px 24px;background:#8c7139;color:white;font-weight:900;cursor:pointer}
 @keyframes gameStartPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+#roundIntroCelebration,#hostStatusCelebration{position:fixed;inset:0;z-index:10030;display:grid;place-items:center;padding:22px;background:radial-gradient(circle at 50% 35%,#344b72f5,#080d18 76%);text-align:center;color:#f5f7ff;overflow:hidden;isolation:isolate}
+#roundIntroCelebration.hidden,#hostStatusCelebration.hidden{display:none}
+.round-intro-card,.host-status-card{width:min(92vw,600px);padding:clamp(30px,7vw,58px) 24px;border:1px solid #e5c77d;border-radius:28px;background:linear-gradient(145deg,#1b2c48f5,#101725f7);box-shadow:0 25px 100px #000c,0 0 70px #e5c77d33;animation:eliminationPop .65s cubic-bezier(.16,1.25,.35,1) both}
+.round-intro-kicker,.host-status-kicker{color:#f1d48b;font-size:11px;font-weight:900;letter-spacing:.28em}
+.round-intro-number{font-size:clamp(64px,15vw,112px);font-weight:1000;line-height:1.05;margin:14px 0;color:#fff1c7;text-shadow:0 0 35px #e5c77d88;animation:gameStartPulse 1.4s ease-in-out infinite}
+.round-intro-card p,.host-status-card p{color:#d8e4f7;line-height:1.5}.round-intro-countdown{margin-top:22px;color:#f1d48b;font-size:clamp(18px,4vw,28px);font-weight:1000;letter-spacing:.12em;text-shadow:0 0 18px #e5c77d66}
+.round-intro-card button,.host-status-card button{margin-top:18px;border:1px solid #f1d48b;border-radius:999px;padding:12px 28px;background:#8c7139;color:white;font-weight:900;cursor:pointer}
+#hostStatusCelebration{z-index:10035;background:radial-gradient(circle at 50% 35%,#503b58f5,#080d18 76%)}
 #winnerCelebration{position:fixed;inset:0;z-index:10020;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 35%,#273b5fee,#070b14f5 72%);overflow:hidden;isolation:isolate}
 #winnerCelebration.hidden{display:none}
 .winner-celebration-card{position:relative;z-index:3;width:min(92vw,560px);padding:34px 24px;text-align:center;border:1px solid #f3d28b;border-radius:28px;background:linear-gradient(145deg,#17243aef,#0c1424f5);box-shadow:0 25px 100px #000b,0 0 55px #e9bd5b45;animation:winnerPop .8s cubic-bezier(.16,1.3,.35,1) both}
@@ -256,6 +285,38 @@ body.phase-card-pick #handSection .note{text-align:center;font-size:12px}
   .brand>div:last-child{text-align:center}
   .top>div:last-child{width:100%;justify-content:center!important}
 }
+
+
+/* Responsive card sizing: keep every card fully visible on laptops and phones. */
+*,*::before,*::after{box-sizing:border-box}
+#handSection,.hand-card-wrap,.cards{min-width:0;max-width:100%}
+#handSection{overflow:visible}
+.cards{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch;gap:clamp(8px,1.5vw,16px);overflow:visible}
+.hand-card-wrap{width:100%;overflow:visible}
+.power-card{width:100%;min-width:0;min-height:0!important;height:auto!important;aspect-ratio:0.72;overflow:visible}
+.power-card .card-flip-inner{width:100%;height:100%!important;min-height:0!important;aspect-ratio:0.72;border-radius:clamp(12px,1.5vw,20px)}
+.power-card .card-face{width:100%;height:100%;inset:0;border-radius:inherit}
+.power-card .card-front{padding:clamp(12px,2vw,24px) clamp(9px,1.5vw,20px)}
+.power-card .card-front .symbol{font-size:clamp(27px,3.2vw,48px);margin-bottom:clamp(6px,1vw,14px)}
+.power-card .card-front h4{font-size:clamp(13px,1.5vw,20px);letter-spacing:clamp(.06em,.12vw,.18em);overflow-wrap:anywhere}
+.power-card .card-front p{font-size:clamp(10px,1vw,13px);line-height:1.4;max-width:100%;overflow-wrap:anywhere}
+.power-card .card-front .mini{bottom:clamp(10px,1.5vw,20px);font-size:clamp(8px,.8vw,10px)}
+.power-card .card-back .back-mark{font-size:clamp(34px,4vw,58px)}
+.power-card .card-back .back-caption{font-size:clamp(8px,.85vw,10px);letter-spacing:clamp(.12em,.2vw,.3em);text-align:center}
+@media(max-width:650px){
+  body.player-view .cards,.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(8px,2.5vw,14px)}
+  .power-card{aspect-ratio:.72}
+  .power-card .card-front{padding:12px 9px}
+  .power-card .card-front h4{font-size:clamp(12px,3.4vw,17px)}
+  .power-card .card-front p{font-size:clamp(9px,2.6vw,12px);line-height:1.35}
+}
+@media(max-width:360px){
+  body.player-view .cards,.cards{gap:7px}
+  .power-card .card-face:before{inset:8px}
+  .power-card .card-front{padding:10px 7px}
+  .power-card .card-front h4{font-size:11px;letter-spacing:.04em}
+  .power-card .card-front p{font-size:9px;line-height:1.25}
+}
 </style>
 </head>
 <body><div class="wrap">
@@ -281,7 +342,7 @@ body.phase-card-pick #handSection .note{text-align:center;font-size:12px}
   <ol>
    <li><b>Fair play:</b> Play honestly. Do not cheat, exploit bugs, or manipulate the game.</li>
    <li><b>Cards:</b> Each active player receives three hidden cards per round, with a higher chance of ATTACK and BLANK. Flip only one card; the other two are discarded. Your chosen card is your only action for the round.</li>
-   <li><b>Card effects:</b> ATTACK targets another player; SHIELD blocks one incoming attack action, including both hits of a DOUBLE ATTACK; REVERSE reflects one incoming attack; HEAL restores one life; JOKER activates a special effect. If it is CARD LOCK, the Joker owner chooses the opponent to block; BLANK has no effect.</li>
+   <li><b>Card effects:</b> ATTACK targets another player; SHIELD blocks 1 damage point from incoming attacks; against a DOUBLE ATTACK, it blocks only 1 of the 2 damage points; REVERSE reflects one incoming attack; HEAL restores one life; JOKER activates a special effect. If it is CARD LOCK, the Joker owner chooses the opponent to block; BLANK has no effect.</li>
    <li><b>Lives:</b> Everyone starts with three lives. At zero lives, the player is eliminated and cannot join later rounds.</li>
    <li><b>Host:</b> The host starts the game, opens rounds, begins defense, resolves results, and may reset the game. The host also plays under the same rules.</li>
    <li><b>Respect:</b> Treat all players respectfully. No bullying, threats, or harassment.</li>
@@ -321,7 +382,7 @@ body.phase-card-pick #handSection .note{text-align:center;font-size:12px}
  <div id="winnerPanel" class="winner hidden"><div class="cup">🏆</div><div class="eyebrow">SURVIVAL DECK CHAMPION</div><h2 id="winnerName">Winner</h2><p class="muted">The last player standing wins Survival Deck.</p></div>
  <div id="gameEndedPanel" class="hidden"><div class="eyebrow">SURVIVAL DECK</div><h2>GAME ENDED BY HOST</h2><p class="muted">The host ended the game early. No winner was declared.</p></div>
 </section>
-<div class="footer">SURVIVAL DECK · PLAY FAIR</div></div><div id="winnerCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winnerCelebrationName"><div class="winner-celebration-card"><div class="trophy">🏆</div><div class="winner-kicker">SURVIVAL DECK CHAMPION</div><h2 id="winnerCelebrationName">WINNER</h2><p>THE LAST PLAYER STANDING!</p><div class="prize-art" aria-label="Celebration money and coins">💵 🪙 💵</div><button id="winnerCloseBtn" class="winner-close" type="button">CELEBRATE!</button></div></div><div id="eliminationCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eliminationPlayerName"><div class="elimination-card"><div class="elimination-symbol">⛔</div><div class="elimination-kicker">SURVIVAL DECK · PLAYER UPDATE</div><h2 id="eliminationPlayerName">PLAYER ELIMINATED</h2><p>Has been eliminated from the game.<br>Everyone has been notified.</p><button id="eliminationCloseBtn" class="elimination-close" type="button">CONTINUE</button></div></div><div id="gameStartCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="gameStartTitle"><div class="game-start-card"><div class="game-start-symbol">⚔️</div><div class="game-start-kicker">SURVIVAL DECK · THE ARENA IS LIVE</div><h2 id="gameStartTitle">THE GAME HAS STARTED!</h2><p>All players, get ready.<br>Survive each round and be the last player standing!</p><button id="gameStartCloseBtn" class="game-start-close" type="button">LET THE GAME BEGIN</button></div></div><div id="eventPopup" class="event-popup hidden" role="status" aria-live="polite"></div><div id="toast" class="toast hidden"></div>
+<div class="footer">SURVIVAL DECK · PLAY FAIR</div></div><div id="winnerCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="winnerCelebrationName"><div class="winner-celebration-card"><div class="trophy">🏆</div><div class="winner-kicker">SURVIVAL DECK CHAMPION</div><h2 id="winnerCelebrationName">WINNER</h2><p>THE LAST PLAYER STANDING!</p><div class="prize-art" aria-label="Celebration money and coins">💵 🪙 💵</div><button id="winnerCloseBtn" class="winner-close" type="button">CELEBRATE!</button></div></div><div id="eliminationCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="eliminationPlayerName"><div class="elimination-card"><div class="elimination-symbol" aria-label="Broken heart">💔</div><div class="elimination-kicker">SURVIVAL DECK · PLAYER UPDATE</div><h2 id="eliminationPlayerName">PLAYER ELIMINATED</h2><p>Their run ends here.</p><button id="eliminationCloseBtn" class="elimination-close" type="button">CONTINUE</button></div></div><div id="gameStartCelebration" class="hidden" role="dialog" aria-modal="true" aria-labelledby="gameStartTitle"><div class="game-start-card"><div class="game-start-symbol">⚔️</div><div class="game-start-kicker">SURVIVAL DECK · THE ARENA IS LIVE</div><h2 id="gameStartTitle">THE GAME HAS STARTED!</h2><p>All players, get ready.<br>Survive each round and be the last player standing!</p><button id="gameStartCloseBtn" class="game-start-close" type="button">LET THE GAME BEGIN</button></div></div><div id="roundIntroCelebration" class="hidden" role="dialog" aria-modal="true"><div class="round-intro-card"><div class="round-intro-kicker">SURVIVAL DECK · GET READY</div><div class="round-intro-number" id="roundIntroNumber">ROUND 1</div><p>Choose carefully. One card. One chance.</p><div id="roundIntroCountdown" class="round-intro-countdown">CARDS OPEN IN 5</div></div></div><div id="hostStatusCelebration" class="hidden" role="dialog" aria-modal="true"><div class="host-status-card"><div class="host-status-kicker">SURVIVAL DECK · HOST UPDATE</div><div class="round-intro-number" id="hostStatusTitle">GAME ENDED</div><p id="hostStatusMessage">The host has ended the game.</p><button id="hostStatusOkay" type="button">OKAY</button></div></div><div id="eventPopup" class="event-popup hidden" role="status" aria-live="polite"></div><div id="toast" class="toast hidden"></div>
 <script>
 (()=>{"use strict";
 /* Add your Supabase project URL and public publishable/anon key here. */
@@ -341,15 +402,16 @@ const players=[
 ];
 const powerInfo={
  ATTACK:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M38 5 14 35h15l-4 24 25-34H35z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/><path d="m12 10 7 7M48 7l-2 8M7 43l9-2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,title:"ATTACK",desc:"Deal 1 damage to your chosen target.",needsTarget:true},
- SHIELD:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5 52 13v16c0 14-8 23-20 30C20 52 12 43 12 29V13z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m21 31 8 8 15-17" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:"SHIELD",desc:"Block one incoming attack action this round, including both hits of a DOUBLE ATTACK.",needsTarget:false},
+ SHIELD:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 5 52 13v16c0 14-8 23-20 30C20 52 12 43 12 29V13z" fill="none" stroke="currentColor" stroke-width="4"/><path d="m21 31 8 8 15-17" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:"SHIELD",desc:"Block 1 damage point this round. Against a DOUBLE ATTACK, block only 1 hit; the other hit still deals 1 damage.",needsTarget:false},
  HEAL:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 55S8 41 8 23C8 10 25 5 32 19 39 5 56 10 56 23c0 18-24 32-24 32Z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M32 22v20M22 32h20" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,title:"HEAL",desc:"Restore 1 life, up to your maximum of 3.",needsTarget:false},
- REVERSE:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 22 7 32l10 10M8 32h27c13 0 21 7 21 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="m44 43 12 7-12 7" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:"REVERSE",desc:"Automatically reflect one incoming attack back to its attacker.",needsTarget:false},
+ REVERSE:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M17 22 7 32l10 10M8 32h27c13 0 21 7 21 18" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="m44 43 12 7-12 7" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,title:"REVERSE",desc:"Reflect incoming damage back to its attacker. Against a DOUBLE ATTACK, reflect both hits (2 damage) back to the attacker.",needsTarget:false},
  JOKER:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M13 48 8 17l17 9 7-18 8 18 16-9-5 31z" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linejoin="round"/><path d="M19 55h26M23 36h.1M41 36h.1" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,title:"JOKER",desc:"Activate a special effect. Its effect is revealed privately to you and applied during resolution.",needsTarget:false},
  BLANK:{icon:`<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="3" stroke-dasharray="4 5"/><path d="M20 32h24" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`,title:"BLANK",desc:"This card has no effect this round.",needsTarget:false}
 };
 const jokerNeedsTarget=new Set(["DOUBLE_ATTACK","LIFE_DRAIN"]);
 const $=id=>document.getElementById(id);
-let db,profile=null,channel=null,game=null,hand=[],chosenCard=null,chosenTarget=null,stats=[],profiles=[],actions=[],reactions=[],timerId=null,toastId=null,lastTick=-1,lastTickKey="",refreshing=false,chosenDefenseCard=null,chosenAttackId=null,onlineUsers=new Set(),pendingKeep=new Set(),pendingRound=null,chatLoading=false,chatLastRound=null;
+let db,profile=null,channel=null,game=null,hand=[],chosenCard=null,chosenTarget=null,stats=[],profiles=[],actions=[],reactions=[],timerId=null,toastId=null,lastTick=-1,lastTickKey="",refreshing=false,chosenDefenseCard=null,chosenAttackId=null,onlineUsers=new Set(),pendingKeep=new Set(),pendingRound=null,chatLoading=false,chatLastRound=null,statsSnapshotReady=false;
+let serverClockOffsetMs=0,clockSyncId=null,clockSyncInFlight=false;
 const configured=()=>SUPABASE_URL.includes(".supabase.co")&&!SUPABASE_URL.includes("YOUR-PROJECT")&&!SUPABASE_ANON_KEY.includes("YOUR_SUPABASE");
 function toast(s){$("toast").textContent=s;$("toast").classList.remove("hidden");clearTimeout(toastId);toastId=setTimeout(()=>$ ("toast").classList.add("hidden"),3200)}
 function errText(e){return e?.message||"Something went wrong. Check your Supabase setup."}
@@ -382,6 +444,11 @@ function playSound(kind="tap"){
    lobby:[[110,0,.34,"sine"],[164,.18,.38,"triangle"],[220,.42,.48,"sine"],[330,.72,.58,"sine"]],
    deal:[[330,0,.08,"triangle"],[440,.1,.08,"triangle"],[554,.2,.12,"triangle"]],
    attack:[[180,0,.18,"sawtooth"],[95,.09,.22,"sawtooth"]],
+   doubleAttack:[[210,0,.14,"sawtooth"],[130,.12,.16,"sawtooth"],[82,.25,.24,"sawtooth"]],
+   drain:[[180,0,.18,"triangle"],[140,.16,.2,"sawtooth"],[95,.34,.28,"sine"]],
+   reverse:[[740,0,.12,"triangle"],[520,.1,.15,"triangle"],[880,.24,.2,"sine"]],
+   cardLock:[[330,0,.12,"square"],[247,.13,.16,"square"],[165,.3,.25,"sine"]],
+   heal:[[440,0,.12,"sine"],[660,.12,.14,"sine"],[880,.25,.22,"sine"]],
    shield:[[660,0,.12,"sine"],[880,.1,.16,"sine"],[1175,.22,.2,"sine"]],
    joker:[[392,0,.12,"triangle"],[587,.1,.12,"triangle"],[784,.2,.12,"triangle"],[1175,.32,.28,"sine"]],
    eliminated:[[330,0,.18,"sawtooth"],[247,.2,.2,"sawtooth"],[165,.42,.35,"sine"]],
@@ -490,7 +557,7 @@ async function declineTerms(){
  $("acceptTermsBtn").textContent="ACCEPT & ENTER";
  $("termsError").textContent="";
 }
-async function enterGame(){document.body.classList.toggle("host-view",isHost());document.body.classList.toggle("player-view",!isHost());$("loginView").classList.add("hidden");$("gameView").classList.remove("hidden");$("welcome").textContent="Welcome, "+profile.display_name;$ ("roleLine").textContent=isHost()?"Host + Player · Your own cards are private too.":"Player · Your cards and actions are private.";$ ("hostPanel").classList.toggle("hidden",!isHost());await refreshAll();subscribe();playSound("lobby")}
+async function enterGame(){document.body.classList.toggle("host-view",isHost());document.body.classList.toggle("player-view",!isHost());$("loginView").classList.add("hidden");$("gameView").classList.remove("hidden");$("welcome").textContent="Welcome, "+profile.display_name;$ ("roleLine").textContent=isHost()?"Host + Player · Your own cards are private too.":"Player · Your cards and actions are private.";$ ("hostPanel").classList.toggle("hidden",!isHost());await syncServerClock();await refreshAll();subscribe();if(clockSyncId)clearInterval(clockSyncId);clockSyncId=setInterval(syncServerClock,60000);playSound("lobby")} 
 async function refreshAll(){if(!profile||refreshing)return;refreshing=true;try{
  const {data:g,error:ge}=await db.from("game_state").select("*").eq("id",1).single();if(ge)throw ge;game=g;
  const [s,p,h,a,r]=await Promise.all([
@@ -500,7 +567,20 @@ async function refreshAll(){if(!profile||refreshing)return;refreshing=true;try{
   db.from("player_actions").select("id,player_id,round_number,card_id,target_id,card_type,joker_effect,created_at").eq("round_number",game.round_number),
   db.from("player_reactions").select("player_id,round_number,card_id,attack_action_id,card_type").eq("round_number",game.round_number)
  ]);
- for(const x of [s,p,h,a,r])if(x.error)throw x.error;stats=s.data||[];profiles=p.data||[];hand=h.data||[];actions=a.data||[];reactions=r.data||[];if(pendingRound!==game.round_number){pendingRound=game.round_number;pendingKeep=new Set();chosenCard=null;chosenTarget=null;}render();
+ for(const x of [s,p,h,a,r])if(x.error)throw x.error;
+ const previousStats=stats;
+ const nextStats=s.data||[];
+ // Realtime UPDATE events are the primary signal; this snapshot comparison is a
+ // fallback so every connected screen still announces a newly eliminated player.
+ if(statsSnapshotReady){
+  nextStats.forEach(current=>{
+   const previous=previousStats.find(old=>old.user_id===current.user_id);
+   if(current.eliminated===true&&previous&&previous.eliminated!==true){
+    showGlobalElimination(current.user_id);
+   }
+  });
+ }
+ stats=nextStats;statsSnapshotReady=true;profiles=p.data||[];hand=h.data||[];actions=a.data||[];reactions=r.data||[];if(pendingRound!==game.round_number){pendingRound=game.round_number;pendingKeep=new Set();chosenCard=null;chosenTarget=null;}render();
  }catch(e){toast(errText(e))}finally{refreshing=false}}
 function renderOnlineStatus(){
  const onlineCount=profiles.filter(p=>onlineUsers.has(p.user_id)).length;
@@ -517,7 +597,7 @@ function subscribe(){
  if(channel)db.removeChannel(channel);
  onlineUsers=new Set();
  channel=db.channel("survival-deck-live",{config:{presence:{key:profile.user_id}}})
-  .on("postgres_changes",{event:"*",schema:"public",table:"game_state"},payload=>{const before=game?.status;const after=payload?.new?.status;if(before==="lobby"&&after&&after!=="lobby")showGameStarted(payload.new);refreshAll()})
+  .on("postgres_changes",{event:"*",schema:"public",table:"game_state"},payload=>{const before=game?.status;const oldRound=Number(game?.round_number||0);const next=payload?.new;const after=next?.status;if(before==="lobby"&&after&&after!=="lobby")showGameStarted(next);if(next&&Number(next.round_number||0)>oldRound&&after==="selecting")showRoundIntro(next.round_number);if(before&&before!=="finished"&&after==="finished"&&next?.ended_by_host)showHostStatus("ended");if(before&&before!=="lobby"&&after==="lobby"&&Number(next?.round_number||0)===0)showHostStatus("reset");refreshAll()})
   .on("postgres_changes",{event:"UPDATE",schema:"public",table:"player_stats"},payload=>{
    const updated=payload?.new;
    if(updated?.eliminated===true&&updated?.user_id&&payload?.old?.eliminated!==true)showGlobalElimination(updated.user_id);
@@ -526,9 +606,8 @@ function subscribe(){
   .on("postgres_changes",{event:"*",schema:"public",table:"player_actions"},()=>refreshAll())
   .on("postgres_changes",{event:"*",schema:"public",table:"player_reactions"},()=>refreshAll())
   .on("postgres_changes",{event:"INSERT",schema:"public",table:"round_chat_messages"},()=>{if(game&&game.status!=="lobby")loadRoundChat()})
-  .on("postgres_changes",{event:"INSERT",schema:"public",table:"round_log"},payload=>{
-   const row=payload?.new;
-   if(row?.message)showGlobalActionNotification(row);
+  .on("postgres_changes",{event:"INSERT",schema:"public",table:"round_log"},()=>{
+   // Individual log rows are collected into one recap after the round resolves.
   })
   .on("postgres_changes",{event:"*",schema:"public",table:"player_cards",filter:"owner_id=eq."+profile.user_id},()=>refreshAll())
   .on("presence",{event:"sync"},()=>{
@@ -561,7 +640,7 @@ function render(){
  renderOnlineStatus();
  $("leaderboard").innerHTML=[...stats].sort((a,b)=>Number(a.eliminated)-Number(b.eliminated)||b.lives-a.lives).map((s,i)=>`<div class="player-row"><div><strong>${i+1}. ${escapeHtml(playerName(s.user_id))}</strong><div class="subline">${s.eliminated?"ELIMINATED":"SURVIVING"}</div></div><span class="lives">${s.lives} ♥</span></div>`).join("");
  $("winnerPanel").classList.toggle("hidden",game.status!=="finished"||!!game.ended_by_host);$("gameEndedPanel").classList.toggle("hidden",!game.ended_by_host);if(game.status==="finished"&&!game.ended_by_host){const w=stats.find(s=>!s.eliminated&&s.lives>0);const winnerName=w?playerName(w.user_id):"No winner";$("winnerName").textContent=winnerName;if(w)showWinnerCelebration(winnerName)}else if(game.status==="lobby"){winnerCelebrated=false;$("winnerCelebration").classList.add("hidden");publicEventQueue=[];publicEventShowing=false;}
- if(game.status==="revealed"||game.status==="finished"){showPersonalRoundEvents()}else{lastPopupRound=null;}renderRoundChat();updateTimer();
+ if(game.status==="revealed"){showPersonalRoundEvents()}else{lastPopupRound=null;}renderRoundChat();updateTimer();
 }
 function cardNeedsTarget(card){return card.card_type==="ATTACK"||(card.card_type==="JOKER"&&(["CARD_LOCK","DOUBLE_ATTACK","LIFE_DRAIN"].includes(card.joker_effect)))}
 function renderHand(){
@@ -619,12 +698,31 @@ async function lockKeptCards(){
 }
 function renderTargets(){const box=$("targetGrid");box.innerHTML="";const isAttackTarget=chosenCard&&(chosenCard.card_type==="ATTACK"||(chosenCard.card_type==="JOKER"&&chosenCard.joker_effect==="DOUBLE_ATTACK"));stats.filter(s=>s.user_id!==profile.user_id&&!s.eliminated&&s.lives>0).forEach(s=>{const alreadyAttacked=isAttackTarget&&actions.some(a=>a.player_id===s.user_id&&(a.card_type==="ATTACK"||(a.card_type==="JOKER"&&a.joker_effect==="DOUBLE_ATTACK")));const b=document.createElement("button");b.disabled=alreadyAttacked;b.className="target"+(chosenTarget===s.user_id?" chosen":"")+(alreadyAttacked?" target-disabled":"");b.innerHTML=`<span>${escapeHtml(playerName(s.user_id))}${alreadyAttacked?" · ALREADY ATTACKED":""}</span><span class="lives">${s.lives} ♥</span>`;b.onclick=()=>{if(alreadyAttacked)return;chosenTarget=s.user_id;renderTargets();$("playBtn").disabled=!chosenCard||!chosenTarget};box.append(b)})}
 async function submitAction(){if(!chosenCard)return;const soundKind=chosenCard.card_type==="ATTACK"?"attack":chosenCard.card_type==="JOKER"?"joker":chosenCard.card_type==="HEAL"?"reveal":"select";const needs=cardNeedsTarget(chosenCard);if(needs&&!chosenTarget){const effect=chosenCard.joker_effect;toast(chosenCard.card_type!=="JOKER"?"Choose an attack target first.":effect==="CARD_LOCK"?"Choose who to block next round.":effect==="DOUBLE_ATTACK"?"Choose who receives the double attack.":"Choose who to drain 1 life from.");return}$("playBtn").disabled=true;try{const {error}=await db.rpc("submit_survival_action",{p_card_id:chosenCard.id,p_target_id:chosenTarget});if(error)throw error;chosenCard=null;chosenTarget=null;playSound(soundKind);toast("Your selected card action is locked.");await refreshAll()}catch(e){const message=errText(e);if(message.toLowerCase().includes("already attacked")||message.toLowerCase().includes("choose another target")){chosenTarget=null;renderTargets();$("playBtn").disabled=true;toast("That player has already attacked. Choose another target.")}else{toast(message);$("playBtn").disabled=false}}}
+// Ask PostgreSQL for its current timestamp and estimate the clock offset using the request midpoint.
+// The deadline remains server-authored; this only keeps each device display aligned to it.
+async function syncServerClock(){
+ if(!db||clockSyncInFlight||!profile)return;
+ clockSyncInFlight=true;
+ const started=Date.now();
+ try{
+  const {data,error}=await db.rpc("get_survival_server_time");
+  const received=Date.now();
+  if(error)throw error;
+  const value=Array.isArray(data)?data[0]:data;
+  const serverMs=new Date(value).getTime();
+  if(Number.isFinite(serverMs))serverClockOffsetMs=serverMs-((started+received)/2);
+ }catch(e){
+  // Keep the last good offset (or local-clock fallback) if the optional sync RPC is unavailable.
+  console.warn("Server clock sync unavailable:",e?.message||e);
+ }finally{clockSyncInFlight=false;updateTimer();}
+}
+function serverNowMs(){return Date.now()+serverClockOffsetMs;}
 let autoPhaseInFlight=false;
 async function autoAdvancePhase(){
  if(!isHost()||autoPhaseInFlight||!game||!game.deadline)return;
  const phase=game.status;
  if(!['selecting','defending'].includes(phase))return;
- if(new Date(game.deadline).getTime()>Date.now())return;
+ if(new Date(game.deadline).getTime()>serverNowMs())return;
  autoPhaseInFlight=true;
  try{
   const rpcName=phase==='selecting'?'begin_survival_defense':'resolve_survival_round';
@@ -640,6 +738,7 @@ async function autoAdvancePhase(){
  }finally{autoPhaseInFlight=false}
 }
 function updateTimer(){
+ if(roundIntroUntilMs>Date.now()){ $("timer").textContent="00:--";const pickTimer=$("cardPickTimer");if(pickTimer)pickTimer.textContent="00:--";return; }
  if(!game||!game.deadline||!['selecting','defending'].includes(game.status)){
   $("timer").textContent="—";
   const pickTimer=$("cardPickTimer");if(pickTimer)pickTimer.textContent="—";
@@ -648,7 +747,7 @@ function updateTimer(){
  }
  const timerKey=String(game.round_number)+":"+game.status+":"+game.deadline;
  if(timerKey!==lastTickKey){lastTickKey=timerKey;lastTick=-1;}
- const sec=Math.max(0,Math.ceil((new Date(game.deadline).getTime()-Date.now())/1000));
+ const sec=Math.max(0,Math.ceil((new Date(game.deadline).getTime()-serverNowMs())/1000));
  const timerText="00:"+String(sec).padStart(2,"0");
  $("timer").textContent=timerText;
  const pickTimer=$("cardPickTimer");if(pickTimer)pickTimer.textContent=timerText;
@@ -710,6 +809,33 @@ let winnerCelebrated=false;
 const announcedEliminations=new Set();
 let gameStartTimer=null;
 let announcedGameStarts=new Set();
+let lastIntroRound=0;
+let roundIntroTimer=null;
+let roundIntroUntilMs=0;
+let lastHostStatusKey="";
+function showRoundIntro(round){
+ const n=Number(round)||0;if(!n||lastIntroRound===n)return;lastIntroRound=n;
+ clearInterval(roundIntroTimer);roundIntroUntilMs=Date.now()+5000;
+ const overlay=$("roundIntroCelebration"),countdown=$("roundIntroCountdown");
+ $("roundIntroNumber").textContent="ROUND "+n;
+ overlay.classList.remove("hidden");
+ // Keep cards and the regular round timer covered during the five-second introduction.
+ $("handSection").classList.add("hidden");
+ if(countdown)countdown.textContent="CARDS OPEN IN 5";
+ playSound("round");
+ let remaining=5;
+ roundIntroTimer=setInterval(()=>{
+  remaining=Math.max(0,Math.ceil((roundIntroUntilMs-Date.now())/1000));
+  if(countdown)countdown.textContent=remaining>0?("CARDS OPEN IN "+remaining):"LET'S GO!";
+  if(remaining<=0){clearInterval(roundIntroTimer);roundIntroTimer=null;overlay.classList.add("hidden");roundIntroUntilMs=0;refreshAll();updateTimer();playSound("deal");}
+ },200);
+}
+function showHostStatus(kind){
+ const key=kind+":"+String(game?.updated_at||Date.now());if(lastHostStatusKey===key)return;lastHostStatusKey=key;
+ const ending=kind==="ended";$("hostStatusTitle").textContent=ending?"GAME ENDED":"GAME RESET";
+ $("hostStatusMessage").textContent=ending?"The host has ended the game. No winner was declared.":"The host reset the game. Everyone is back in the lobby.";
+ $("hostStatusCelebration").classList.remove("hidden");playSound("reveal");
+}
 function showGameStarted(updatedGame){
  const key=String(updatedGame?.updated_at||updatedGame?.round_number||"started");
  if(announcedGameStarts.has(key))return;
@@ -733,29 +859,39 @@ function showGlobalElimination(userId){
  playSound("eliminated");
 }
 const announcedPublicActions=new Set();
+function classifyRoundEvent(message){
+ const t=String(message||"").toLocaleLowerCase().replace(/[_-]+/g," ");
+ if(t.includes("double attack")||t.includes("2 damage")||t.includes("two damage"))return {kind:"doubleAttack",icon:"⚔️⚔️",title:"DOUBLE ATTACK",accent:"#ff626d",sound:"doubleAttack"};
+ if(t.includes("life drain")||t.includes("drain"))return {kind:"drain",icon:"🩸",title:"LIFE DRAIN",accent:"#c05cff",sound:"drain"};
+ if(t.includes("reflected")||t.includes("reflected by reverse")||t.includes("sent back to the attacker"))return {kind:"reverse",icon:"↩️",title:"ATTACK REVERSED",accent:"#b78aff",sound:"reverse"};
+ if(t.includes("card lock")||t.includes("locked next round")||t.includes("cannot select a card"))return {kind:"cardLock",icon:"🔒",title:"CARD LOCK",accent:"#8ba8ff",sound:"cardLock"};
+ if(t.includes("full protection")&&(t.includes("blocked")||t.includes("prevented")||t.includes("stopped")))return {kind:"shield",icon:"🛡️",title:"FULL PROTECTION",accent:"#72c5ff",sound:"shield"};
+ if(t.includes("blocked by shield")||t.includes("shield blocked")||t.includes("shield prevented"))return {kind:"shield",icon:"🛡️",title:"SHIELD BLOCKED AN ATTACK",accent:"#72c5ff",sound:"shield"};
+ if(t.includes("double heal"))return {kind:"heal",icon:"💚💚",title:"DOUBLE HEAL",accent:"#69e2a7",sound:"heal"};
+ if(t.includes("heal")||t.includes("restored")||t.includes("recover")||t.includes("extra life")||t.includes("added 1 life")||t.includes("gained 1 life")||t.includes("add 1 life"))return {kind:"heal",icon:"💚",title:"LIFE ADDED",accent:"#69e2a7",sound:"heal"};
+ if(t.includes("attack")||t.includes("attacked")||t.includes("damage"))return {kind:"attack",icon:"⚔️",title:"ATTACK RESOLVED",accent:"#ff737d",sound:"attack"};
+ 
+ return null;
+}
 function showGlobalActionNotification(row){
  const message=String(row.message||"");
- const lower=message.toLocaleLowerCase();
- const isAttack=lower.includes("attack")||lower.includes("attacked");
- const isHeal=lower.includes("heal")||lower.includes("restored")||lower.includes("recover");
- if(!isAttack&&!isHeal)return;
+ const effect=classifyRoundEvent(message);
+ if(!effect)return;
  const id=String(row.id||row.created_at||message);
  if(announcedPublicActions.has(id))return;
  announcedPublicActions.add(id);
- publicEventQueue.push({row,message,isAttack,isHeal});
+ publicEventQueue.push({row,message,effect});
  showNextPublicEvent();
 }
 function showNextPublicEvent(){
  if(publicEventShowing||!publicEventQueue.length)return;
  publicEventShowing=true;
- const item=publicEventQueue.shift();
- const row=item.row;
+ const item=publicEventQueue.shift(),row=item.row,effect=item.effect;
  const popup=$("eventPopup");
- const title=item.isAttack&&item.isHeal?"ACTION RESOLVED":item.isAttack?"ATTACK NOTIFICATION":"HEAL NOTIFICATION";
- popup.innerHTML=`<div class="event-kicker">SURVIVAL DECK · ROUND ${Number(row.round_number||game?.round_number)||0}</div><div class="event-title">${title}</div><div class="event-message">${escapeHtml(item.message)}</div><div class="event-progress"></div>`;
+ popup.innerHTML=`<div class="event-inner" style="--event-accent:${effect.accent}"><div class="event-icon">${effect.icon}</div><div class="event-kicker">SURVIVAL DECK · ROUND ${Number(row.round_number||game?.round_number)||0}</div><div class="event-title">${effect.title}</div><div class="event-message">${escapeHtml(item.message)}</div><div class="event-progress"></div><div class="event-hint">ROUND EVENT · ALL PLAYERS</div></div>`;
  popup.classList.remove("hidden");clearTimeout(popupTimer);
- if(item.isAttack)playSound("attack");else playSound("reveal");
- popupTimer=setTimeout(()=>{popup.classList.add("hidden");publicEventShowing=false;showNextPublicEvent()},6200);
+ playSound(effect.sound);
+ popupTimer=setTimeout(()=>{popup.classList.add("hidden");publicEventShowing=false;showNextPublicEvent()},5200);
 }
 function showWinnerCelebration(name){
  if(winnerCelebrated||!name)return;
@@ -784,41 +920,37 @@ function showPersonalRoundEvents(){
  const thisRound=game?.round_number;
  if(!thisRound||lastPopupRound===thisRound)return;
  lastPopupRound=thisRound;
- db.from("round_log").select("id,message,created_at").eq("round_number",thisRound).order("created_at",{ascending:true}).then(({data,error})=>{
-  if(error||!profile)return;
-  const ownName=String(profile.display_name||playerName(profile.user_id)).trim().toLocaleLowerCase();
-  const relevant=(data||[]).filter(row=>{
-   const lower=String(row.message||"").toLocaleLowerCase();
-   // Elimination is a public game event: every connected player must see it.
-   // Other round-log messages remain limited to the player they mention.
-   const isPersonal=ownName&&lower.includes(ownName);
-   const isPublicAction=lower.includes("attack")||lower.includes("attacked")||lower.includes("heal")||lower.includes("restored")||lower.includes("recover");
-   return isPersonal&&!isPublicAction&&!lower.includes("has been eliminated")&&!lower.includes("was eliminated")&&!lower.startsWith("round resolved")&&!lower.startsWith("the game is finished");
+ // Give the round-resolution transaction a moment to finish writing its log rows.
+ setTimeout(async()=>{
+  if(!profile||!game||game.round_number!==thisRound||game.status!=="revealed")return;
+  const {data,error}=await db.from("round_log").select("id,message,created_at").eq("round_number",thisRound).order("created_at",{ascending:true});
+  if(error){lastPopupRound=null;toast("Round recap could not load. Please refresh.");return;}
+  if(!profile||!game||game.round_number!==thisRound||game.status!=="revealed")return;
+  const rows=(data||[]).filter(row=>{
+   const message=String(row.message||"");
+   const lower=message.toLocaleLowerCase();
+   return !!classifyRoundEvent(message)&&!lower.startsWith("round resolved")&&!lower.startsWith("the game is finished");
   });
-  if(!relevant.length)return;
-  const popup=$("eventPopup");let index=0;
-  const showNext=()=>{
-   if(index>=relevant.length){popup.classList.add("hidden");return;}
-   const message=String(relevant[index++].message||""),lower=message.toLocaleLowerCase();
-   let title="ROUND UPDATE";
-   if(lower.includes("blocked by shield"))title="YOUR SHIELD HELD";
-   else if(lower.includes("blocked by full protection"))title="FULL PROTECTION";
-   else if(lower.includes("reflected by reverse"))title="ATTACK REFLECTED";
-   else if(lower.includes("double attack"))title="DOUBLE ATTACK";
-   else if(lower.includes("life drain"))title="LIFE DRAIN";
-   else if(lower.includes("attacked"))title="ATTACK RESOLVED";
-   else if(lower.includes("eliminated"))title="ELIMINATED";
-   else if(lower.includes("card lock"))title="CARD LOCK";
-   else if(lower.includes("restored"))title="LIFE RESTORED";
-   popup.innerHTML=`<div class="event-kicker">SURVIVAL DECK · ROUND ${thisRound}</div><div class="event-title">${escapeHtml(title)}</div><div class="event-message">${escapeHtml(message)}</div><div class="event-progress"></div>`;
-   popup.classList.remove("hidden");clearTimeout(popupTimer);popupTimer=setTimeout(showNext,6200);
-  };
-  showNext();
- });
+  const popup=$("eventPopup");
+  const entries=rows.slice(0,18).map(row=>{
+   const message=String(row.message||"");
+   const effect=classifyRoundEvent(message);
+   return `<div class="event-recap-row" style="--event-accent:${effect.accent}"><div class="event-recap-icon">${effect.icon}</div><div class="event-recap-copy"><div class="event-recap-title">${escapeHtml(effect.title)}</div><div class="event-recap-message">${escapeHtml(message)}</div></div></div>`;
+  }).join("");
+  const extra=rows.length>18?`<div class="event-hint">AND ${rows.length-18} MORE IMPORTANT EVENTS</div>`:"";
+  popup.innerHTML=`<div class="event-inner" style="--event-accent:#d5ad62"><div class="event-icon">🏟️</div><div class="event-kicker">SURVIVAL DECK · ROUND ${thisRound}</div><div class="event-title">ROUND RECAP</div><div class="event-recap-list">${entries||'<div class="event-message">No major events this round.</div>'}</div>${extra}<div class="event-hint">IMPORTANT EVENTS ONLY</div><button class="event-confirm" id="roundHighlightsOkay" type="button">OKAY</button></div>`;
+  popup.classList.remove("hidden");
+  clearTimeout(popupTimer);
+  const firstEffect=rows.length?classifyRoundEvent(rows[0].message):null;
+  playSound(firstEffect?.sound||"reveal");
+ },450);
 }
-async function logout(){stopPickAmbience();document.body.classList.remove("phase-card-pick","host-view","player-view");if(timerId)clearInterval(timerId);if(channel)await db.removeChannel(channel);await db.auth.signOut();profile=null;game=null;hand=[];stats=[];actions=[];reactions=[];onlineUsers=new Set();$ ("gameView").classList.add("hidden");$("loginView").classList.remove("hidden");$("password").value=""}
+
+async function logout(){stopPickAmbience();document.body.classList.remove("phase-card-pick","host-view","player-view");if(timerId)clearInterval(timerId);if(channel)await db.removeChannel(channel);await db.auth.signOut();profile=null;game=null;hand=[];stats=[];statsSnapshotReady=false;actions=[];reactions=[];onlineUsers=new Set();$ ("gameView").classList.add("hidden");$("loginView").classList.remove("hidden");$("password").value=""}
+$("eventPopup").addEventListener("click",(event)=>{if(event.target&&event.target.id==="roundHighlightsOkay"){$("eventPopup").classList.add("hidden");clearTimeout(popupTimer);publicEventShowing=false;showNextPublicEvent()}});
 $("eliminationCloseBtn").addEventListener("click",()=>{$("eliminationCelebration").classList.add("hidden");clearTimeout(eliminationTimer)});
 $("gameStartCloseBtn").addEventListener("click",()=>{$("gameStartCelebration").classList.add("hidden");clearTimeout(gameStartTimer)});
+$("hostStatusOkay").addEventListener("click",()=>$("hostStatusCelebration").classList.add("hidden"));
 $("winnerCloseBtn").addEventListener("click",()=>{$("winnerCelebration").classList.add("hidden")});
 $("soundToggle").addEventListener("click",()=>{soundEnabled=!soundEnabled;localStorage.setItem("survivalDeckSound",soundEnabled?"on":"off");updateSoundButton();if(soundEnabled){playSound("login");if(document.body.classList.contains("phase-card-pick"))startPickAmbience()}else stopPickAmbience()});updateSoundButton();
 // Subtle sound for every button unless its own handler already played a specific effect.
@@ -859,5 +991,7 @@ document.getElementById("togglePassword")?.addEventListener("click",()=>{
   btn.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
  }
 });
+
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){syncServerClock();updateTimer();}});
 })();
 </script></body></html>
